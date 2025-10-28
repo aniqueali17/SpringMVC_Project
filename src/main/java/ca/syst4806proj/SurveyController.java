@@ -12,6 +12,4 @@ public class SurveyController {
     public SurveyController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
-
 }
