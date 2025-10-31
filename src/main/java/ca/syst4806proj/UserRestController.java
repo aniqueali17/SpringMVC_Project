@@ -4,11 +4,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
-public class UserController {
+public class UserRestController {
 
     private final UserRepository userRepository;
 
-    public UserController(UserRepository userRepository) {
+    public UserRestController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
