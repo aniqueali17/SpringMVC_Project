@@ -15,15 +15,15 @@ public class UserController {
 
     @GetMapping
     public String getAllUsers(Model model) {
-        model.addAttribute("insert attribute name here", userRepository.findAll());
-        return "insert html file name here";
+        model.addAttribute("users", userRepository.findAll());
+        return "users";
     }
 
     @GetMapping("/{id}")
     public String getUser(@PathVariable Long id, Model model) {
         User user = userRepository.findById(id).orElseThrow();
-        model.addAttribute("insert attribute name here", user);
-        return "insert html file name here";
+        model.addAttribute("user", user);
+        return "user-detail";
     }
 
     @PostMapping("/create")
@@ -32,8 +32,8 @@ public class UserController {
 
         userRepository.save(user);
 
-        model.addAttribute("insert attribute name here", user);
-        return "redirect:/insert html file name here/" + user.getId();
+        model.addAttribute("user", user);
+        return "redirect:/users/" + user.getId();
     }
 
 }

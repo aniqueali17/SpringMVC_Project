@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Users</title>
+</head>
+<body>
+<h2>All Users</h2>
+
+<table border="1" cellpadding="6">
+    <tr><th>ID</th><th>Name</th><th>Link</th></tr>
+    <tr th:each="u : ${users}">
+        <td th:text="${u.id}"></td>
+        <td th:text="${u.name}"></td>
+        <td><a th:href="@{'/users/' + ${u.id}}">View</a></td>
+    </tr>
+</table>
+
+<h3>Add New User</h3>
+<form th:action="@{/users/create}" method="post">
+    <input type="text" name="name" placeholder="Enter name" required />
+    <button type="submit">Create</button>
+</form>
+
+</body>
+<style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    table { border-collapse: collapse; width: 50%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background-color: #f2f2f2; }
+    tr:hover { background-color: #f9f9f9; }
+    input { padding: 5px; }
+    button { padding: 5px 10px; }
+</style>
+
+</html>
