@@ -38,7 +38,7 @@ The final milestone will focus on user authentication, analytics, and deployment
 - **Authentication System** – enable login, logout, and role-based access.  
 - **Admin Dashboard** – manage users and monitor surveys.  
 - **Analytics Module** – display statistics and response summaries.  
-- **Cloud Deployment** – host the system on Azure or Heroku with persistent storage.  
+- **Cloud Deployment** – host the system on Azure with persistent storage.  
 
 ***
 
