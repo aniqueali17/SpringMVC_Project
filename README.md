@@ -9,7 +9,7 @@
 
 -  Set up the User entity and repositories.
   
--  Built a Thymeleaf-based UI for user management.
+-  Built a Thymeleaf-based UI for user creation.
 
 -  Completed deployment testing and successfully deployed the project to Azure.
 
