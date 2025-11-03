@@ -51,9 +51,9 @@ The final milestone will focus on user authentication, analytics, and deployment
 
 ### 2. Clone the Repository
 ```bash
-git clone https://github.com/aniqueali17/SpringMVC_Project.git
-cd SpringMVC_Project
-<p>2. Run the main file</p>
-<p>3. Open the application in your browser - go to: http://localhost:8080/users</p>
+1. git clone https://github.com/aniqueali17/SpringMVC_Project.git
+2. cd SpringMVC_Project
+3. Run the main file</p>
+4. Open the application in your browser - go to: http://localhost:8080/users</p>
 
 
