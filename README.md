@@ -19,6 +19,12 @@ The focus of Milestone 1 was on building the core structure of the application a
 - **Testing and Deployment** – verified application startup and functionality; runs locally on `http://localhost:8080/users`.
 
 ***
+### UML Diagram - Model
+<img width="448" height="361" alt="image" src="https://github.com/user-attachments/assets/d7f16ae8-7d9c-4fe2-a27e-c05cccb2da7e" />
+
+### UML Diagram - Controller
+<img width="1120" height="513" alt="image" src="https://github.com/user-attachments/assets/8123381d-d703-4654-a0df-7dc80b08e073" />
+
 
 # Milestone #2
 This milestone will introduce survey creation and response management.
