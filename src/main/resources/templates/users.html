@@ -8,13 +8,34 @@
 <h2>All Users</h2>
 
 <table border="1" cellpadding="6">
-    <tr><th>ID</th><th>Name</th><th>Link</th></tr>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Link</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
     <tr th:each="u : ${users}">
         <td th:text="${u.id}"></td>
         <td th:text="${u.name}"></td>
-        <td><a th:href="@{'/users/' + ${u.id}}">View</a></td>
+        <td>
+            <a th:href="@{'/users/' + ${u.id}}">View</a>   <!-- moved here -->
+        </td>
+        <td>
+            <form th:action="@{'/users/' + ${u.id} + '/remove'}" method="post" style="display:inline;">
+                <button type="submit">Remove</button>
+            </form>
+        </td>
     </tr>
+    </tbody>
 </table>
+
+
+<div th:if="${message}" style="margin:10px 0; padding:8px; border:1px solid #ddd;">
+    <span th:text="${message}"></span>
+</div>
 
 <h3>Add New User</h3>
 <form th:action="@{/users/create}" method="post">
