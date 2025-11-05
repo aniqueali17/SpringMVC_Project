@@ -2,6 +2,9 @@ package ca.syst4806proj;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.hibernate.StaleObjectStateException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -40,11 +43,13 @@ public class UserController {
 
     @PostMapping("/{id}/remove")
     public String removeUser(@PathVariable Long id, RedirectAttributes ra) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+        try {
+            userRepository.deleteById(id);     // single call
             ra.addFlashAttribute("message", "Removed user #" + id);
-        } else {
-            ra.addFlashAttribute("message", "User #" + id + " not found");
+        } catch (EmptyResultDataAccessException
+                 | ObjectOptimisticLockingFailureException
+                 | StaleObjectStateException e) {
+            ra.addFlashAttribute("message", "User #" + id + " not found or already removed");
         }
         return "redirect:/users";
     }
