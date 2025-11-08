@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Survey Detail</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    table { border-collapse: collapse; width: 70%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background-color: #f2f2f2; }
+    tr:hover { background-color: #f9f9f9; }
+    input { padding: 5px; }
+    button { padding: 5px 10px; }
+    .mt { margin-top: 18px; }
+  </style>
+</head>
+<body>
+
+<h2>Survey Detail</h2>
+
+<p><b>ID:</b> <span th:text="${survey.id}"></span></p>
+<p><b>Title:</b> <span th:text="${survey.title}"></span></p>
+<p>
+  <b>Owner:</b>
+  <span th:text="${survey.owner != null ? survey.owner.name : '—'}"></span>
+  <span th:if="${survey.owner != null}"> (ID: <span th:text="${survey.owner.id}"></span>)</span>
+</p>
+
+<h3 class="mt">Text Questions</h3>
+<table border="1" cellpadding="6">
+  <tr><th>ID</th><th>Prompt</th><th>Order</th></tr>
+  <tr th:each="q : ${survey.textQuestions}">
+    <td th:text="${q.id}"></td>
+    <td th:text="${q.prompt}"></td>
+    <td th:text="${q.ordinalIndex}"></td>
+  </tr>
+  <tr th:if="${#lists.isEmpty(survey.textQuestions)}">
+    <td colspan="3"><i>No questions yet.</i></td>
+  </tr>
+</table>
+
+<div th:if="${message}" class="mt" style="padding:8px; border:1px solid #ddd;">
+  <span th:text="${message}"></span>
+</div>
+
+<h3 class="mt">Add Text Question</h3>
+<form th:action="@{'/surveys/' + ${survey.id} + '/textq/create'}" method="post">
+  <input type="text" name="prompt" placeholder="Enter question prompt" required />
+  <input type="number" name="ordinalIndex" placeholder="Order (optional)" />
+  <button type="submit">Add</button>
+</form>
+
+<p class="mt"><a th:href="@{/surveys}">← Back to list</a></p>
+</body>
+</html>

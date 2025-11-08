@@ -1,10 +1,21 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Users</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        table { border-collapse: collapse; width: 60%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f9f9f9; }
+        input { padding: 6px; }
+        button { padding: 6px 10px; }
+        .mt { margin-top: 18px; }
+    </style>
 </head>
 <body>
+
 <h2>All Users</h2>
 
 <table border="1" cellpadding="6">
@@ -13,45 +24,37 @@
         <th>ID</th>
         <th>Name</th>
         <th>Link</th>
-        <th>Actions</th>
+        <th>Surveys</th>   <!-- keep this header -->
+        <th>Actions</th>   <!-- keep this header -->
     </tr>
     </thead>
+
     <tbody>
+    <!-- REPLACE your existing row with this whole block -->
     <tr th:each="u : ${users}">
         <td th:text="${u.id}"></td>
         <td th:text="${u.name}"></td>
-        <td>
-            <a th:href="@{'/users/' + ${u.id}}">View</a>   <!-- moved here -->
-        </td>
+        <td><a th:href="@{'/users/' + ${u.id}}">View</a></td>
+        <td><a th:href="@{'/users/' + ${u.id} + '/surveys'}">Open</a></td>
         <td>
             <form th:action="@{'/users/' + ${u.id} + '/remove'}" method="post" style="display:inline;">
-                <button type="submit">Remove</button>
+                <button type="submit" onclick="return confirm('Remove this user?')">Remove</button>
             </form>
         </td>
     </tr>
+
     </tbody>
 </table>
 
-
-<div th:if="${message}" style="margin:10px 0; padding:8px; border:1px solid #ddd;">
+<div th:if="${message}" style="margin:12px 0; padding:8px; border:1px solid #ddd;">
     <span th:text="${message}"></span>
 </div>
 
-<h3>Add New User</h3>
+<h3 class="mt">Add New User</h3>
 <form th:action="@{/users/create}" method="post">
     <input type="text" name="name" placeholder="Enter name" required />
     <button type="submit">Create</button>
 </form>
 
 </body>
-<style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    table { border-collapse: collapse; width: 50%; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background-color: #f2f2f2; }
-    tr:hover { background-color: #f9f9f9; }
-    input { padding: 5px; }
-    button { padding: 5px 10px; }
-</style>
-
 </html>
