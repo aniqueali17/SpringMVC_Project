@@ -1,6 +1,6 @@
 package ca.syst4806proj;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-//public interface SurveyRepository extends CrudRepository<SurveyRepository, Long> {
-//}
+public interface SurveyRepository extends JpaRepository<Survey, Long> {
+}
