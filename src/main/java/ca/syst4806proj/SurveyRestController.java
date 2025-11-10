@@ -1,5 +1,6 @@
 package ca.syst4806proj;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,22 +44,18 @@ public class SurveyRestController {
         return ResponseEntity.ok(surveyRepo.save(s));
     }
 
-    // Get one survey (includes its text questions)
-    // GET /api/surveys/{id}
-    @GetMapping("/surveys/{id}")
-    public ResponseEntity<?> getSurvey(@PathVariable Long id) {
-        return surveyRepo.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    // GET /api/surveys
+    @GetMapping(value = "/surveys", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Iterable<Survey> listSurveys() {
+        return surveyRepo.findAll();
     }
 
-    // List surveys (optionally filter by ownerId)
-    // GET /api/surveys?ownerId=1
-    // example
-    @GetMapping("/api/surveys")
-    public ResponseEntity<?> listSurveys(@RequestParam(required = false) Long ownerId) {
-        if (ownerId == null) return ResponseEntity.ok(surveyRepo.findAll());
-        return ResponseEntity.ok(surveyRepo.findByOwner_Id(ownerId));
+    // GET /api/surveys/{id}
+    @GetMapping(value = "/surveys/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Survey> getSurvey(@PathVariable Long id) {
+        return surveyRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
 
@@ -76,7 +73,6 @@ public class SurveyRestController {
 
             TextQ q = new TextQ();
             q.setPrompt(prompt.trim());
-            q.setOrdinalIndex(ord);
             q.setOrdinalIndex(ord);
             survey.addTextQ(q);
             surveyRepo.save(survey);

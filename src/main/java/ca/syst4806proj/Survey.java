@@ -1,5 +1,6 @@
 package ca.syst4806proj;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +15,13 @@ public class Survey {
 
     // Binds the survey to the creator (specific user)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_id")
+    @JsonIgnoreProperties({"surveys"})
     private User owner;
 
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("ordinalIndex ASC NULLS LAST, id ASC")
+    @JsonIgnoreProperties({"survey"})
     private List<TextQ> textQuestions = new ArrayList<>();
 
     public Long getId() { return id; }
