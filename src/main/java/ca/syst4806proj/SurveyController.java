@@ -1,52 +1,90 @@
 package ca.syst4806proj;
 
-import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 @Controller
-@RequestMapping("/surveys")
 public class SurveyController {
 
-    private final SurveyRepository repo;
+    private final SurveyRepository surveyRepo;
+    private final UserRepository userRepo;
 
-    public SurveyController(SurveyRepository repo) {
-        this.repo = repo;
+    public SurveyController(SurveyRepository surveyRepo, UserRepository userRepo) {
+        this.surveyRepo = surveyRepo;
+        this.userRepo = userRepo;
     }
 
-    @GetMapping
-    public String list(Model model) {
-        model.addAttribute("surveys", repo.findAll());
-        model.addAttribute("surveyForm", new Survey());
-        return "surveys/list";
+    // LIST page
+    @GetMapping("/surveys")
+    public String listSurveys(Model model) {
+        model.addAttribute("surveys", surveyRepo.findAll());
+        model.addAttribute("users", userRepo.findAll()); // for owner dropdown
+        return "surveys";
     }
 
-    @PostMapping
-    public String create(@ModelAttribute("surveyForm") @Valid Survey form,
-                         BindingResult br,
-                         Model model) {
-        if (br.hasErrors()) {
-            model.addAttribute("surveys", repo.findAll());
-            return "surveys/list";
+    // CREATE survey (title + ownerId)
+    @PostMapping("/surveys/create")
+    public String createSurvey(@RequestParam String title, @RequestParam Long ownerId, Model model) {
+        Optional<User> owner = userRepo.findById(ownerId);
+        if (owner.isEmpty()) {
+            model.addAttribute("message", "Owner not found");
+            model.addAttribute("surveys", surveyRepo.findAll());
+            model.addAttribute("users", userRepo.findAll());
+            return "surveys";
         }
-        repo.save(form);
+        Survey s = new Survey();
+        s.setTitle(title);
+        s.setOwner(owner.get());
+        surveyRepo.save(s);
         return "redirect:/surveys";
     }
 
-    @GetMapping("/{id}")
-    public String details(@PathVariable Long id, Model model) {
-        Survey s = repo.findById(id).orElseThrow();
+    // DETAIL page
+    @GetMapping("/surveys/{id}")
+    public String viewSurvey(@PathVariable Long id, Model model) {
+        Survey s = surveyRepo.findById(id).orElse(null);
+        if (s == null) return "redirect:/surveys";
         model.addAttribute("survey", s);
-        return "surveys/details";
+        return "survey-detail";
     }
 
-    @PostMapping("/{id}/close")
-    public String close(@PathVariable Long id) {
-        Survey s = repo.findById(id).orElseThrow();
-        s.setClosed(true);
-        repo.save(s);
+    // ADD Text Question
+    @PostMapping("/surveys/{id}/textq/create")
+    public String addTextQ(@PathVariable Long id,
+                           @RequestParam String prompt,
+                           @RequestParam(required = false) Integer ordinalIndex,
+                           Model model) {
+        Survey s = surveyRepo.findById(id).orElse(null);
+        if (s == null) return "redirect:/surveys";
+        if (prompt == null || prompt.isBlank()) {
+            model.addAttribute("survey", s);
+            model.addAttribute("message", "Prompt is required");
+            return "redirect:/survey-detail";
+        }
+        TextQ q = new TextQ();
+        q.setPrompt(prompt.trim());
+        q.setOrdinalIndex(ordinalIndex);
+        s.addTextQ(q);            // sets both sides
+        surveyRepo.save(s);       // cascades
+        return "redirect:/surveys/" + id;
+    }
+
+    @PostMapping("/surveys/{id}/remove")
+    public String removeSurvey(@PathVariable Long id) {
+        surveyRepo.deleteById(id);
         return "redirect:/surveys";
     }
+
+
+    @GetMapping("/users/{ownerId}/surveys")
+    public String listSurveysForOwner(@PathVariable Long ownerId, Model model) {
+        if (userRepo.findById(ownerId).isEmpty()) return "redirect:/users";
+        model.addAttribute("surveys", surveyRepo.findByOwner_Id(ownerId));
+        model.addAttribute("users", userRepo.findAll());
+        model.addAttribute("selectedOwnerId", ownerId); // preselects owner on /surveys page
+        return "surveys"; // uses surveys.html
+    }
+
 }

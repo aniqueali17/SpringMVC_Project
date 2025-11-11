@@ -1,32 +1,41 @@
 package ca.syst4806proj;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "surveys")
 public class Survey {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue
     private Long id;
 
     @Column(nullable = false)
     private String title;
 
-    @Column(length = 2000)
-    private String description;
+    // Binds the survey to the creator (specific user)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_id")
+    @JsonIgnoreProperties({"surveys"})
+    private User owner;
 
-    @Column(nullable = false)
-    private boolean closed = false;
-
-    @Column(nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
+    @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("ordinalIndex ASC NULLS LAST, id ASC")
+    @JsonIgnoreProperties({"survey"})
+    private List<TextQ> textQuestions = new ArrayList<>();
 
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public boolean isClosed() { return closed; }
-    public void setClosed(boolean closed) { this.closed = closed; }
-    public Instant getCreatedAt() { return createdAt; }
+
+    public User getOwner() { return owner; }
+    public void setOwner(User owner) { this.owner = owner; }
+
+    public List<TextQ> getTextQuestions() { return textQuestions; }
+    public void addTextQ(TextQ q) { q.setSurvey(this); textQuestions.add(q); }
+    public void removeTextQ(TextQ q) { textQuestions.remove(q); q.setSurvey(null); }
+
+    // (Optional) convenience for views/JSON
+    @Transient
+    public Long getOwnerId() { return owner != null ? owner.getId() : null; }
 }
