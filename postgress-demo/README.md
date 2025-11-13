@@ -9,6 +9,7 @@ https://www.docker.com/
 2. After installing verify if Docker is in the system run the following commands:
 
     > docker --version
+    
     > docker compose version
 
 These commands should return the version number of Docker.
@@ -20,6 +21,7 @@ The Docker desktop app will open, and you will need to create your account after
 4. Run the following commands from the folder that has the docker-compose.yml file (docker yml file):
     
     > docker compose up -d (Start background and check what's running)
+    
     > docker compose ps (Optional check to make sure that Docker containers are running)
     
 5. Open the browser and type http://localhost:8081 or change the port number to which you are outputting. You should 
