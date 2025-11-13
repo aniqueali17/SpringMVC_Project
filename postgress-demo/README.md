@@ -8,8 +8,8 @@ https://www.docker.com/
 
 2. After installing verify if Docker is in the system run the following commands:
 
-    docker --version
-    docker compose version
+    > docker --version
+    > docker compose version
 
 These commands should return the version number of Docker.
 
@@ -19,8 +19,8 @@ The Docker desktop app will open, and you will need to create your account after
 
 4. Run the following commands from the folder that has the docker-compose.yml file (docker yml file):
     
-    docker compose up -d (Start background and check what's running)
-    docker compose ps (Optional check to make sure that Docker containers are running)
+    > docker compose up -d (Start background and check what's running)
+    > docker compose ps (Optional check to make sure that Docker containers are running)
     
 5. Open the browser and type http://localhost:8081 or change the port number to which you are outputting. You should 
 see your work once you are on the web address above. 
@@ -30,11 +30,11 @@ file from their.
 
 7. To stop running from the IntelliJ terminal you can use the following command:
 
-    docker compose down (Stop containers)
+    > docker compose down ( This is to stop containers)
     
     Or to delete this currently running projects database data use:
     
-    docker compose down -v 
+    > docker compose down -v 
 
 Do not worry the work that has been seeded into the code will still show once you rerun the start background 
 commands above so they will not be deleted with the command "docker compose down -v" . 
