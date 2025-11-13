@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>PostgREST Demo (Users/Surveys/Questions)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+        h1 { margin-bottom: 4px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .card { border:1px solid #ddd; border-radius:12px; padding:16px; }
+        table { width:100%; border-collapse:collapse; margin-top:8px; }
+        th,td { padding:8px; border-bottom:1px solid #eee; text-align:left; }
+        input,select,button { padding:8px 10px; border:1px solid #ccc; border-radius:8px; }
+        .actions button{margin-right:6px}
+        pre { background:#0a0a0a; color:#d6d6d6; padding:12px; border-radius:10px; overflow:auto; }
+    </style>
+</head>
+<body>
+<h1>Out-of-the-box REST with PostgREST</h1>
+<div>Backend: <code>/pg/*</code> (proxied to PostgREST). This page is static.</div>
+
+<div class="grid" style="margin-top:12px">
+    <div class="card">
+        <h2>Users</h2>
+        <form id="userForm">
+            <input name="name" placeholder="Name" required />
+            <input name="email" placeholder="Email (optional)" />
+            <button>Create</button>
+        </form>
+        <table id="usersTbl"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div class="card">
+        <h2>Surveys</h2>
+        <form id="surveyForm">
+            <input name="title" placeholder="Title" required />
+            <select name="owner_id" id="ownerSelect"><option value="">(no owner)</option></select>
+            <button>Create</button>
+        </form>
+        <table id="surveysTbl"><thead><tr><th>ID</th><th>Title</th><th>Owner</th><th>Actions</th></tr></thead><tbody></tbody></table>
+    </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+    <h2>Questions by Survey</h2>
+    <form id="qForm">
+        <input name="survey_id" placeholder="Survey ID" required />
+        <input name="prompt" placeholder="Prompt" required style="width:45%"/>
+        <button>Add Question</button>
+    </form>
+    <div style="margin-top:6px">
+        <input id="qSurveyId" placeholder="Survey ID to view" />
+        <button id="btnLoadQs">Load</button>
+    </div>
+    <table id="qTbl"><thead><tr><th>ID</th><th>Survey</th><th>Prompt</th><th>Actions</th></tr></thead><tbody></tbody></table>
+</div>
+
+<div class="card" style="margin-top:16px">
+    <h2>Raw JSON (debug)</h2>
+    <pre id="debug"></pre>
+</div>
+
+<script>
+    const j = r => r.json();
+    const h = {'Content-Type':'application/json'};
+
+    async function loadUsers(){
+        const rows = await fetch('/pg/users').then(j);
+        const tbody = document.querySelector('#usersTbl tbody');
+        tbody.innerHTML = '';
+        rows.forEach(u=>{
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.email ?? ''}</td>
+      <td class="actions"><button onclick="renameUser(${u.id})">Rename</button>
+      <button onclick="delUser(${u.id})">Delete</button></td>`;
+            tbody.appendChild(tr);
+        });
+        // owners dropdown
+        const sel = document.getElementById('ownerSelect');
+        const keep = sel.value;
+        sel.innerHTML = '<option value="">(no owner)</option>' +
+            rows.map(u=>`<option value="${u.id}">${u.name} (#${u.id})</option>`).join('');
+        sel.value = keep;
+        document.getElementById('debug').textContent = JSON.stringify(rows, null, 2);
+    }
+
+    async function loadSurveys(){
+        const rows = await fetch('/pg/surveys').then(j);
+        const tbody = document.querySelector('#surveysTbl tbody');
+        tbody.innerHTML = '';
+        rows.forEach(s=>{
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${s.id}</td><td>${s.title}</td><td>${s.owner_id ?? ''}</td>
+      <td class="actions"><button onclick="renameSurvey(${s.id})">Rename</button>
+      <button onclick="delSurvey(${s.id})">Delete</button>
+      <button onclick="loadQuestionsFor(${s.id})">View Qs</button></td>`;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('debug').textContent = JSON.stringify(rows, null, 2);
+    }
+
+    async function loadQuestionsFor(sid){ document.getElementById('qSurveyId').value = sid; loadQuestions(); }
+    async function loadQuestions(){
+        const sid = document.getElementById('qSurveyId').value; if(!sid) return;
+        const rows = await fetch(`/pg/text_questions?survey_id=eq.${sid}`).then(j);
+        const tbody = document.querySelector('#qTbl tbody');
+        tbody.innerHTML = '';
+        rows.forEach(q=>{
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${q.id}</td><td>${q.survey_id}</td><td>${q.prompt}</td>
+      <td class="actions"><button onclick="editQ(${q.id})">Edit</button>
+      <button onclick="delQ(${q.id})">Delete</button></td>`;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('debug').textContent = JSON.stringify(rows, null, 2);
+    }
+
+    // forms + actions
+    document.getElementById('userForm').addEventListener('submit', async e=>{
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        await fetch('/pg/users', { method:'POST', headers:h, body: JSON.stringify({name:fd.get('name'), email:fd.get('email')||null}) });
+        e.target.reset(); loadUsers();
+    });
+    async function renameUser(id){ const name=prompt('New name?'); if(!name) return;
+        await fetch(`/pg/users?id=eq.${id}`, { method:'PATCH', headers:h, body: JSON.stringify({name}) }); loadUsers();
+    }
+    async function delUser(id){ if(!confirm('Delete?')) return;
+        await fetch(`/pg/users?id=eq.${id}`, { method:'DELETE' }); loadUsers();
+    }
+
+    document.getElementById('surveyForm').addEventListener('submit', async e=>{
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const payload = { title: fd.get('title'), owner_id: fd.get('owner_id') ? Number(fd.get('owner_id')) : null };
+        await fetch('/pg/surveys', { method:'POST', headers:h, body: JSON.stringify(payload) });
+        e.target.reset(); loadSurveys();
+    });
+    async function renameSurvey(id){ const title=prompt('New title?'); if(!title) return;
+        await fetch(`/pg/surveys?id=eq.${id}`, { method:'PATCH', headers:h, body: JSON.stringify({title}) }); loadSurveys();
+    }
+    async function delSurvey(id){ if(!confirm('Delete?')) return;
+        await fetch(`/pg/surveys?id=eq.${id}`, { method:'DELETE' }); loadSurveys();
+    }
+
+    document.getElementById('qForm').addEventListener('submit', async e=>{
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const payload = { survey_id: Number(fd.get('survey_id')), prompt: fd.get('prompt') };
+        await fetch('/pg/text_questions', { method:'POST', headers:h, body: JSON.stringify(payload) });
+        e.target.reset(); loadQuestions();
+    });
+    async function editQ(id){ const promptText=prompt('New prompt?'); if(!promptText) return;
+        await fetch(`/pg/text_questions?id=eq.${id}`, { method:'PATCH', headers:h, body: JSON.stringify({prompt:promptText}) }); loadQuestions();
+    }
+    async function delQ(id){ if(!confirm('Delete?')) return;
+        await fetch(`/pg/text_questions?id=eq.${id}`, { method:'DELETE' }); loadQuestions();
+    }
+
+    loadUsers().then(loadSurveys);
+</script>
+</body>
+</html>

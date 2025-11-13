@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: surveydb
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgrest:
+    # either of these exists; pick ONE:
+    image: postgrest/postgrest:latest
+    # image: ghcr.io/postgrest/postgrest:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://postgres:postgres@db:5432/surveydb
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: anon
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:alpine
+    depends_on:
+      - postgrest
+    volumes:
+      - ./ui:/usr/share/nginx/html:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8081:80"
