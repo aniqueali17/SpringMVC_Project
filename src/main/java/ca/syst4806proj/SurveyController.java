@@ -3,6 +3,8 @@ package ca.syst4806proj;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -85,6 +87,38 @@ public class SurveyController {
         model.addAttribute("users", userRepo.findAll());
         model.addAttribute("selectedOwnerId", ownerId); // preselects owner on /surveys page
         return "surveys"; // uses surveys.html
+    }
+
+
+    @GetMapping("/surveys/{id}/fill")
+    public String fillSurvey(@PathVariable Long id, Model model) {
+        Survey s = surveyRepo.findById(id).orElse(null);
+        if (s == null) return "redirect:/surveys";
+
+        model.addAttribute("survey", s);
+        return "survey-fill";
+    }
+
+
+    @PostMapping("/survey/submit")
+    public String submitSurvey(
+            @RequestParam Long surveyId,
+            @RequestParam(required = false) List<String> questions,
+            @RequestParam(required = false) List<String> answers) {
+
+        // For now, just print out the results
+        System.out.println("Survey ID: " + surveyId);
+        if (questions != null && answers != null) {
+            for (int i = 0; i < questions.size(); i++) {
+                String qText = questions.get(i);
+                String answer = i < answers.size() ? answers.get(i) : "(no answer)";
+                System.out.println("Question: " + qText);
+                System.out.println("Answer: " + answer);
+                System.out.println();
+            }
+        }
+
+        return "redirect:/surveys"; // redirect
     }
 
 }
