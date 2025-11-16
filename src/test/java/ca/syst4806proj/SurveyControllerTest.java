@@ -20,6 +20,6 @@ class SurveyControllerTest {
     void listPageLoads() throws Exception {
         mvc.perform(get("/surveys"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("surveys/list"));
+                .andExpect(view().name("surveys"));
     }
 }
