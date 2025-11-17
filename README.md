@@ -33,7 +33,15 @@ This milestone will introduce survey creation and response management.
 - **Survey Creation** – users can build surveys with different question types (range, text, multiple choice).  
 - **Response Collection** – respondents can fill and submit surveys online.  
 - **Improved UI** – add pages for survey creation, submission, and result viewing.  
-- **REST API Expansion** – provide endpoints for managing surveys and responses.  
+- **REST API Expansion** – provide endpoints for managing surveys and responses.
+
+***
+### UML Diagram - Model
+<img width="1224" height="756" alt="image" src="https://github.com/user-attachments/assets/8cb41d07-56f1-4f58-964c-f45d96e8b6e9" />
+
+***
+### ER Diagram - Model
+<img width="1377" height="542" alt="image" src="https://github.com/user-attachments/assets/18ce955f-1b8c-4e76-8a58-850f93db2745" />
 
 ***
 
