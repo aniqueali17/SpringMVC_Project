@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Surveys</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 32px; }
+        table { border-collapse: collapse; width: 100%; max-width: 800px; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background: #f4f4f4; }
+        form.inline { display: inline; }
+        .error { color: #b00020; }
+    </style>
+</head>
+<body>
+<h2>All Surveys</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="s : ${surveys}">
+        <td th:text="${s.id}">1</td>
+        <td><a th:href="@{|/surveys/${s.id}|}" th:text="${s.title}">Sample</a></td>
+        <td th:text="${s.closed} ? 'Closed' : 'Open'">Open</td>
+        <td>
+            <form th:if="${!s.closed}" class="inline" th:action="@{|/surveys/${s.id}/close|}" method="post">
+                <button type="submit">Close</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<h3 style="margin-top:28px;">Create Survey</h3>
+<form th:action="@{/surveys}" th:object="${surveyForm}" method="post" style="max-width:800px;">
+    <div>
+        <label>Title</label><br>
+        <input th:field="*{title}" required />
+        <div class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+    </div>
+    <div style="margin-top:8px;">
+        <label>Description</label><br>
+        <textarea th:field="*{description}" rows="3" style="width:100%;"></textarea>
+    </div>
+    <button type="submit" style="margin-top:10px;">Create</button>
+</form>
+
+<p style="margin-top:24px;"><a href="/users">Users page</a></p>
+</body>
+</html>

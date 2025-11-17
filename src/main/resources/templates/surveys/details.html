@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${survey.title}">Survey</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 32px; }
+    </style>
+</head>
+<body>
+<p><a href="/surveys">Back</a></p>
+
+<h2 th:text="${survey.title}">Title</h2>
+<p th:text="${survey.description}">Description</p>
+<p>Status: <strong th:text="${survey.closed} ? 'Closed' : 'Open'">Open</strong></p>
+
+<form th:if="${!survey.closed}" th:action="@{|/surveys/${survey.id}/close|}" method="post">
+    <button type="submit">Close survey</button>
+</form>
+</body>
+</html>
