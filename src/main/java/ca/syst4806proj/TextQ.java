@@ -2,6 +2,7 @@ package ca.syst4806proj;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 public class TextQ {
