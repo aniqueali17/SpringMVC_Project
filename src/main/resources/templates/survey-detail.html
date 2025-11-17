@@ -28,11 +28,21 @@
 
 <h3 class="mt">Text Questions</h3>
 <table border="1" cellpadding="6">
-  <tr><th>ID</th><th>Prompt</th><th>Order</th></tr>
+  <tr><th>ID</th><th>Prompt</th><th>Order</th><th>Entries</th><th>Results</th></tr>
   <tr th:each="q : ${survey.textQuestions}">
     <td th:text="${q.id}"></td>
     <td th:text="${q.prompt}"></td>
     <td th:text="${q.ordinalIndex}"></td>
+    <td>
+      <button th:onclick="|window.location.href='@{/surveys/{surveyID}/textQs/{textQID}/createAnswer(surveyID=${survey.id}, textQID=${q.id})}'|">
+        Add Answer
+      </button>
+    </td>
+    <td>
+      <button th:onclick="|window.location.href='@{/textQs/{textQID}/viewAnswers(textQID=${q.id})}'|">
+        View Answer
+      </button>
+    </td>
   </tr>
   <tr th:if="${#lists.isEmpty(survey.textQuestions)}">
     <td colspan="3"><i>No questions yet.</i></td>

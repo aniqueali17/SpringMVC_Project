@@ -5,7 +5,7 @@
     <title>SYSC 4806 Group 1 - Survey Monkey</title>
 </head>
 <body>
-<h1 th:text="'Add Answer to Text Question: ' + ${textQ.getPrompt()} + ' in Survey: ' + ${survey.getTitle()()}"></h1>
+<h1 th:text="'Add Answer to Text Question: ' + ${textQ.prompt} + ' in Survey: ' + ${survey.title}"></h1>
 <form method="post" th:object="${textA}" th:action="@{/saveTextAnswer(surveyId=${surveyID}, textQId=${textQID})}">
     <label for="questionText">The Answer:</label>
     <input type="text" id="questionText" th:field="*{answer}">
