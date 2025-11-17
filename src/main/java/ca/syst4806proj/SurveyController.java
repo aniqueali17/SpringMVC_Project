@@ -74,11 +74,12 @@ public class SurveyController {
         q.setOrdinalIndex(ordinalIndex);
         s.addTextQ(q);            // sets both sides
         surveyRepo.save(s);       // cascades
+        model.addAttribute("textQ", q);
         return "redirect:/surveys/" + id;
     }
 
     //Create text question answer
-    @GetMapping("surveys/{surveyID}/textQs/{textQID}/createAnswer")
+    @GetMapping("/surveys/{surveyID}/textQs/{textQID}/createAnswer")
     public String createTextQAnswer(@PathVariable("surveyID") Long surveyID, @PathVariable("textQID") Long textQID, Model model) {
         Survey s = surveyRepo.findById(surveyID).get();
         TextQ tq = textQRepo.findById(textQID).get();
@@ -97,7 +98,7 @@ public class SurveyController {
 
     //Save text question answer
     @PostMapping("/saveTextAnswer")
-    public String saveTextAnswer(TextA ta, @RequestParam Long surveyID, @RequestParam Long textQID, Model model) {
+    public String saveTextAnswer(TextA ta, @RequestParam("surveyId") Long surveyID, @RequestParam("textQId") Long textQID, Model model) {
         Survey s = surveyRepo.findById(surveyID).get();
         TextQ tq = textQRepo.findById(textQID).get();
 
@@ -112,7 +113,7 @@ public class SurveyController {
     }
 
     //View text answers
-    @GetMapping("textQs/{textQID}/viewAnswers")
+    @GetMapping("/textQs/{textQID}/viewAnswers")
     public String viewTextQAnswers(@PathVariable Long textQID, Model model) {
         TextQ tq = textQRepo.findById(textQID).get();
         List<TextA> answers = tq.getTextA();
