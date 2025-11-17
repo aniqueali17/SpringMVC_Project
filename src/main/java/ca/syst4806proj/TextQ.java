@@ -16,7 +16,7 @@ public class TextQ {
 
     @OneToMany(mappedBy = "textQ", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TextA> textAList;
-    
+
     @JsonIgnore // avoids lazy-serialization recursion in REST responses
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Survey survey;
@@ -30,7 +30,7 @@ public class TextQ {
     public void setSurvey(Survey survey) { this.survey = survey; }
     public void addTextA(TextA textA) { this.textAList.add(textA); }
     public List<TextA> getTextA(){ return textAList; }
-    
+
     @Transient
     public Long getSurveyId() { return survey != null ? survey.getId() : null; }
 }

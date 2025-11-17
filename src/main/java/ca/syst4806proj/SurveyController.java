@@ -12,10 +12,14 @@ public class SurveyController {
 
     private final SurveyRepository surveyRepo;
     private final UserRepository userRepo;
+    private final TextQRepository textQRepo;
+    private final TextARepository textARepo;
 
-    public SurveyController(SurveyRepository surveyRepo, UserRepository userRepo) {
+    public SurveyController(SurveyRepository surveyRepo, UserRepository userRepo, TextQRepository textQRepo, TextARepository textARepo) {
         this.surveyRepo = surveyRepo;
         this.userRepo = userRepo;
+        this.textQRepo = textQRepo;
+        this.textARepo = textARepo;
     }
 
     // LIST page
@@ -70,8 +74,56 @@ public class SurveyController {
         q.setOrdinalIndex(ordinalIndex);
         s.addTextQ(q);            // sets both sides
         surveyRepo.save(s);       // cascades
+        model.addAttribute("textQ", q);
         return "redirect:/surveys/" + id;
     }
+
+    //Create text question answer
+    @GetMapping("/surveys/{surveyID}/textQs/{textQID}/createAnswer")
+    public String createTextQAnswer(@PathVariable("surveyID") Long surveyID, @PathVariable("textQID") Long textQID, Model model) {
+        Survey s = surveyRepo.findById(surveyID).get();
+        TextQ tq = textQRepo.findById(textQID).get();
+        TextA ta = new TextA();
+        ta.setQuestion(tq);
+        //expose model data for rendering on the client side/ post and get requests
+        model.addAttribute("survey", s);
+        model.addAttribute("textQ", tq);
+        model.addAttribute("textA", ta);
+        model.addAttribute("surveyID", surveyID);
+        model.addAttribute("textQID", textQID);
+
+        //return html file for rendering
+        return "textAnswer-create";
+    }
+
+    //Save text question answer
+    @PostMapping("/saveTextAnswer")
+    public String saveTextAnswer(TextA ta, @RequestParam("surveyId") Long surveyID, @RequestParam("textQId") Long textQID, Model model) {
+        Survey s = surveyRepo.findById(surveyID).get();
+        TextQ tq = textQRepo.findById(textQID).get();
+
+        tq.addTextA(ta);
+        ta.setQuestion(tq);
+
+        surveyRepo.save(s);
+        textQRepo.save(tq);
+        textARepo.save(ta);
+
+        return "redirect:/surveys/" + surveyID;
+    }
+
+    //View text answers
+    @GetMapping("/textQs/{textQID}/viewAnswers")
+    public String viewTextQAnswers(@PathVariable Long textQID, Model model) {
+        TextQ tq = textQRepo.findById(textQID).get();
+        List<TextA> answers = tq.getTextA();
+
+        model.addAttribute("answers", answers);
+        model.addAttribute("textQ", tq);
+
+        return "textAnswer-view";
+    }
+
 
     @PostMapping("/surveys/{id}/remove")
     public String removeSurvey(@PathVariable Long id) {

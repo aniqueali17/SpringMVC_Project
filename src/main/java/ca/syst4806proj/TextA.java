@@ -4,27 +4,27 @@ import jakarta.persistence.*;
 
 @Entity
 public class TextA {
-    public String Answer;
+    public String answer;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
-    @ManyToOne
-    public TextQ question;
+    @ManyToOne(fetch = FetchType.EAGER)
+    public TextQ textQ;
 
     public TextA() {}
 
     public TextA(String answer) {
-        this.Answer = answer;
+        this.answer = answer;
     }
 
     public void setAnswer(String answer) {
-        Answer = answer;
+        this.answer = answer;
     }
 
     public String getAnswer() {
-        return Answer;
+        return answer;
     }
 
     public void setId(Integer id) {
@@ -36,10 +36,10 @@ public class TextA {
     }
 
     public TextQ getQuestion() {
-        return question;
+        return textQ;
     }
 
     public void setQuestion(TextQ question) {
-        this.question = question;
+        this.textQ = question;
     }
 }

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>SYSC 4806 Group 1 - Survey Monkey</title>
+    <style>
+        th {
+            border: solid 2px black;
+            padding: 5px 5px;
+            background-color: lightblue;
+        }
+        td {
+            border: solid 1px black;
+            padding: 2px 2px;
+            background-color: lightgreen;
+        }
+    </style>
+</head>
+<body>
+<h1 th:text="'Text Question:  ' + ${textQ.prompt} "></h1>
+<table>
+    <thead>
+    <tr>
+        <th>Answer ID</th>
+        <th>Answer Text</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="answer : ${answers}">
+        <td th:text="${answer.getId()}"></td>
+        <td th:text="${answer.getAnswer()}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<a th:href="@{/surveys}">Return to Survey Display</a>
+</body>
+</html>
