@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${survey.title}">Survey</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .question {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 0.6rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 1.1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<h1 th:text="${survey.title}">Survey Title</h1>
+
+<form th:action="@{/survey/submit}" method="post">
+    <!-- include hidden field for survey id -->
+    <input type="hidden" th:name="surveyId" th:value="${survey.id}" />
+
+    <!-- loop through textQuestions -->
+    <div th:each="q, iterStat : ${survey.textQuestions}" class="question">
+        <label th:for="'q' + ${iterStat.index}"
+               th:text="${q.prompt}">Question text</label>
+
+        <input type="hidden" name="questions"
+               th:value="${q.prompt}" />
+
+        <label>
+            <input type="text"
+                   th:id="'q' + ${iterStat.index}"
+                   th:name="answers"
+                   placeholder="Enter your answer here" />
+        </label>
+    </div>
+
+    <button type="submit">Submit</button>
+</form>
+</body>
+</html>
