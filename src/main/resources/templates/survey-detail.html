@@ -38,6 +38,7 @@
     <th>Order</th>
     <th>Entries</th>
     <th>Results</th>
+    <th>Actions</th>
   </tr>
 
   <tr th:each="q : ${survey.textQuestions}">
@@ -54,12 +55,23 @@
         View Answer
       </button>
     </td>
+    <td>
+      <form th:action="@{'/textq/' + ${q.id} + '/delete'}"
+            method="post"
+            style="display:inline;">
+        <input type="hidden" name="surveyId" th:value="${survey.id}" />
+        <button type="submit" onclick="return confirm('Delete this text question?')">
+          Delete
+        </button>
+      </form>
+    </td>
   </tr>
 
   <tr th:if="${#lists.isEmpty(survey.textQuestions)}">
-    <td colspan="5"><i>No questions yet.</i></td>
+    <td colspan="6"><i>No questions yet.</i></td>
   </tr>
 </table>
+
 
 <h3 class="mt">Add Text Question</h3>
 <form th:action="@{'/surveys/' + ${survey.id} + '/textq/create'}" method="post">

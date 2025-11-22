@@ -81,6 +81,17 @@ public class SurveyController {
         return "redirect:/surveys/" + id;
     }
 
+    // Delete text question
+    @PostMapping("/textq/{id}/delete")
+    public String deleteTextQ(@PathVariable Long id,
+                              @RequestParam("surveyId") Long surveyId,
+                              RedirectAttributes redirectAttributes) {
+
+        textQRepo.deleteById(id);
+        redirectAttributes.addFlashAttribute("message", "Text question deleted.");
+        return "redirect:/surveys/" + surveyId;
+    }
+
     //Create text question answer
     @GetMapping("/surveys/{surveyID}/textQs/{textQID}/createAnswer")
     public String createTextQAnswer(@PathVariable("surveyID") Long surveyID, @PathVariable("textQID") Long textQID, Model model) {
