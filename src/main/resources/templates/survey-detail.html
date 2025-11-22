@@ -1,19 +1,3 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8"/>
-  <title>Survey Detail</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    table { border-collapse: collapse; width: 70%; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background-color: #f2f2f2; }
-    tr:hover { background-color: #f9f9f9; }
-    input { padding: 5px; }
-    button { padding: 5px 10px; }
-    .mt { margin-top: 18px; }
-  </style>
-</head>
 <body>
 
 <h2>Survey Detail</h2>
@@ -23,12 +7,23 @@
 <p>
   <b>Owner:</b>
   <span th:text="${survey.owner != null ? survey.owner.name : '—'}"></span>
-  <span th:if="${survey.owner != null}"> (ID: <span th:text="${survey.owner.id}"></span>)</span>
+  <span th:if="${survey.owner != null}">
+    (ID: <span th:text="${survey.owner.id}"></span>)
+  </span>
 </p>
 
+<!-- ===================== TEXT QUESTIONS ===================== -->
+
 <h3 class="mt">Text Questions</h3>
-<table border="1" cellpadding="6">
-  <tr><th>ID</th><th>Prompt</th><th>Order</th><th>Entries</th><th>Results</th></tr>
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Prompt</th>
+    <th>Order</th>
+    <th>Entries</th>
+    <th>Results</th>
+  </tr>
+
   <tr th:each="q : ${survey.textQuestions}">
     <td th:text="${q.id}"></td>
     <td th:text="${q.prompt}"></td>
@@ -44,14 +39,11 @@
       </button>
     </td>
   </tr>
+
   <tr th:if="${#lists.isEmpty(survey.textQuestions)}">
-    <td colspan="3"><i>No questions yet.</i></td>
+    <td colspan="5"><i>No questions yet.</i></td>
   </tr>
 </table>
-
-<div th:if="${message}" class="mt" style="padding:8px; border:1px solid #ddd;">
-  <span th:text="${message}"></span>
-</div>
 
 <h3 class="mt">Add Text Question</h3>
 <form th:action="@{'/surveys/' + ${survey.id} + '/textq/create'}" method="post">
@@ -60,6 +52,61 @@
   <button type="submit">Add</button>
 </form>
 
+<hr class="mt" />
+
+<!-- ===================== RANGE QUESTIONS ===================== -->
+
+<h3 class="mt">Range Questions</h3>
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Prompt</th>
+    <th>Range</th>
+    <th>Order</th>
+    <th>Actions</th>
+  </tr>
+
+  <!-- Only renders when there *are* range questions -->
+  <tr th:each="rq : ${survey.rangeQuestions}">
+    <td th:text="${rq.id}"></td>
+    <td th:text="${rq.prompt}"></td>
+    <td>
+      <span th:text="${rq.minValue}"></span>
+      –
+      <span th:text="${rq.maxValue}"></span>
+    </td>
+    <td th:text="${rq.ordinalIndex}"></td>
+    <td>
+      <form th:action="@{'/rangeq/' + ${rq.id} + '/delete'}"
+            method="post"
+            style="display:inline;">
+        <input type="hidden" name="surveyId" th:value="${survey.id}" />
+        <button type="submit" onclick="return confirm('Delete this range question?')">
+          Delete
+        </button>
+      </form>
+    </td>
+  </tr>
+
+  <!-- Only one message row when list is empty -->
+  <tr th:if="${#lists.isEmpty(survey.rangeQuestions)}">
+    <td colspan="5"><i>No range questions yet.</i></td>
+  </tr>
+</table>
+
+<h3 class="mt">Add Range Question</h3>
+<form th:action="@{'/surveys/' + ${survey.id} + '/rangeq/create'}" method="post">
+  <input type="text" name="prompt" placeholder="Range question prompt" required />
+  <input type="number" name="minValue" placeholder="Min" required />
+  <input type="number" name="maxValue" placeholder="Max" required />
+  <input type="number" name="ordinalIndex" placeholder="Order (optional)" />
+  <button type="submit">Add</button>
+</form>
+
+<!-- optional message box for validation errors -->
+<div th:if="${message}" class="mt" style="padding:8px; border:1px solid #ddd;">
+  <span th:text="${message}"></span>
+</div>
+
 <p class="mt"><a th:href="@{/surveys}">← Back to list</a></p>
 </body>
-</html>

@@ -1,4 +1,7 @@
 package ca.syst4806proj;
+import org.springframework.data.repository.CrudRepository;
 
-public class RangeQRepository {
+public interface RangeQRepository extends CrudRepository<RangeQ, Long> {
+
+
 }
