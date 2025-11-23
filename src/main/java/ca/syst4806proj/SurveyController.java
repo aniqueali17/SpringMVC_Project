@@ -3,6 +3,7 @@ package ca.syst4806proj;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,12 +15,14 @@ public class SurveyController {
     private final UserRepository userRepo;
     private final TextQRepository textQRepo;
     private final TextARepository textARepo;
+    private final RangeQRepository rangeQRepo;
 
-    public SurveyController(SurveyRepository surveyRepo, UserRepository userRepo, TextQRepository textQRepo, TextARepository textARepo) {
+    public SurveyController(SurveyRepository surveyRepo, UserRepository userRepo, TextQRepository textQRepo, TextARepository textARepo, RangeQRepository rangeQRepo) {
         this.surveyRepo = surveyRepo;
         this.userRepo = userRepo;
         this.textQRepo = textQRepo;
         this.textARepo = textARepo;
+        this.rangeQRepo = rangeQRepo;
     }
 
     // LIST page
@@ -76,6 +79,17 @@ public class SurveyController {
         surveyRepo.save(s);       // cascades
         model.addAttribute("textQ", q);
         return "redirect:/surveys/" + id;
+    }
+
+    // Delete text question
+    @PostMapping("/textq/{id}/delete")
+    public String deleteTextQ(@PathVariable Long id,
+                              @RequestParam("surveyId") Long surveyId,
+                              RedirectAttributes redirectAttributes) {
+
+        textQRepo.deleteById(id);
+        redirectAttributes.addFlashAttribute("message", "Text question deleted.");
+        return "redirect:/surveys/" + surveyId;
     }
 
     //Create text question answer
@@ -171,6 +185,57 @@ public class SurveyController {
         }
 
         return "redirect:/surveys"; // redirect
+    }
+
+    // Create rangeq
+    @PostMapping("/surveys/{id}/rangeq/create")
+    public String addRangeQ(@PathVariable Long id,
+                            @RequestParam String prompt,
+                            @RequestParam Integer minValue,
+                            @RequestParam Integer maxValue,
+                            @RequestParam(required = false) Integer ordinalIndex,
+                            RedirectAttributes redirectAttributes) {
+
+        Optional<Survey> opt = surveyRepo.findById(id);
+        if (opt.isEmpty()) {
+            return "redirect:/surveys";
+        }
+        Survey s = opt.get();
+
+        // basic validation
+        if (prompt == null || prompt.isBlank()) {
+            redirectAttributes.addFlashAttribute("message", "Prompt is required.");
+            return "redirect:/surveys/" + id;
+        }
+        if (minValue == null || maxValue == null || minValue > maxValue) {
+            redirectAttributes.addFlashAttribute("message", "Invalid range (min/max).");
+            return "redirect:/surveys/" + id;
+        }
+
+        RangeQ q = new RangeQ();
+        q.setPrompt(prompt.trim());
+        q.setMinValue(minValue);
+        q.setMaxValue(maxValue);
+        q.setOrdinalIndex(ordinalIndex);
+        q.setSurvey(s);      // owning side
+
+        rangeQRepo.save(q);
+        // optionally keep bidirectional list in sync:
+        // s.addRangeQ(q);
+
+        redirectAttributes.addFlashAttribute("message", "Range question added.");
+        return "redirect:/surveys/" + id;
+    }
+
+    // Delete RangeQ question
+    @PostMapping("/rangeq/{id}/delete")
+    public String deleteRangeQ(@PathVariable Long id,
+                               @RequestParam("surveyId") Long surveyId,
+                               RedirectAttributes redirectAttributes) {
+
+        rangeQRepo.deleteById(id);
+        redirectAttributes.addFlashAttribute("message", "Range question deleted.");
+        return "redirect:/surveys/" + surveyId;
     }
 
 }
