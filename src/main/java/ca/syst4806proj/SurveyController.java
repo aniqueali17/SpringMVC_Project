@@ -1,5 +1,6 @@
 package ca.syst4806proj;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -7,6 +8,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class SurveyController {
@@ -16,6 +19,14 @@ public class SurveyController {
     private final TextQRepository textQRepo;
     private final TextARepository textARepo;
     private final RangeQRepository rangeQRepo;
+    @Autowired
+    private SurveyRepository surveyRepository;
+
+    @Autowired
+    private TextARepository textARepository;
+
+    @Autowired
+    private TextQRepository textQRepository;
 
     public SurveyController(SurveyRepository surveyRepo, UserRepository userRepo, TextQRepository textQRepo, TextARepository textARepo, RangeQRepository rangeQRepo) {
         this.surveyRepo = surveyRepo;
@@ -49,6 +60,55 @@ public class SurveyController {
         surveyRepo.save(s);
         return "redirect:/surveys";
     }
+
+    @GetMapping("/surveys/{surveyId}/results")
+    public String viewSurveyResults(@PathVariable Long surveyId, Model model) {
+        Survey survey = surveyRepository.findById(surveyId).orElse(null);
+        if (survey == null) {
+            return "redirect:/surveys";
+        }
+
+        model.addAttribute("survey", survey);
+
+        // collect answers per text question
+        Map<Long, List<TextA>> answerMap = new HashMap<>();
+        for (TextQ q : survey.getTextQuestions()) {
+            List<TextA> answers = textARepository.findByTextQId(q.getId());
+            answerMap.put(q.getId(), answers);
+        }
+
+        model.addAttribute("answerMap", answerMap);
+
+        return "survey-results";
+    }
+
+    @PostMapping("/survey/submit")
+    public String submitSurvey(
+            @RequestParam("surveyId") Long surveyId,
+            @RequestParam("questions") List<String> questions,
+            @RequestParam("answers") List<String> answers) {
+
+        Survey survey = surveyRepository.findById(surveyId).orElse(null);
+        if (survey == null) {
+            return "redirect:/surveys";
+        }
+
+        List<TextQ> textQs = survey.getTextQuestions();
+
+        for (int i = 0; i < textQs.size(); i++) {
+            TextQ q = textQs.get(i);
+            String ans = answers.get(i);
+
+            TextA newAnswer = new TextA();
+            newAnswer.setAnswer(ans);
+            newAnswer.setQuestion(q);   // correct
+
+            textARepository.save(newAnswer);
+        }
+
+        return "redirect:/surveys/" + surveyId + "/results";
+    }
+
 
     // DETAIL page
     @GetMapping("/surveys/{id}")
@@ -165,27 +225,6 @@ public class SurveyController {
         return "survey-fill";
     }
 
-
-    @PostMapping("/survey/submit")
-    public String submitSurvey(
-            @RequestParam Long surveyId,
-            @RequestParam(required = false) List<String> questions,
-            @RequestParam(required = false) List<String> answers) {
-
-        // For now, just print out the results
-        System.out.println("Survey ID: " + surveyId);
-        if (questions != null && answers != null) {
-            for (int i = 0; i < questions.size(); i++) {
-                String qText = questions.get(i);
-                String answer = i < answers.size() ? answers.get(i) : "(no answer)";
-                System.out.println("Question: " + qText);
-                System.out.println("Answer: " + answer);
-                System.out.println();
-            }
-        }
-
-        return "redirect:/surveys"; // redirect
-    }
 
     // Create rangeq
     @PostMapping("/surveys/{id}/rangeq/create")

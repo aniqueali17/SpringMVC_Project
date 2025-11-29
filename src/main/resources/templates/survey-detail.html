@@ -19,6 +19,11 @@
 <h2>Survey Detail</h2>
 
 <p><b>ID:</b> <span th:text="${survey.id}"></span></p>
+<p>
+  <button onclick="window.location.href='/surveys/[[${survey.id}]]/results'">
+    View Full Results
+  </button>
+</p>
 <p><b>Title:</b> <span th:text="${survey.title}"></span></p>
 <p>
   <b>Owner:</b>
