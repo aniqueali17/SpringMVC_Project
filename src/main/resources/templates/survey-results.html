@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Survey Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h2 { margin-top: 30px; }
+        table { border-collapse: collapse; width: 70%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+<h1 th:text="'Results for: ' + ${survey.title}"></h1>
+
+<div th:each="q : ${survey.textQuestions}">
+    <h2 th:text="${q.prompt}"></h2>
+
+    <table>
+        <tr>
+            <th>Answer ID</th>
+            <th>Answer</th>
+        </tr>
+
+        <tr th:each="ans : ${answerMap[q.id]}">
+            <td th:text="${ans.id}"></td>
+            <td th:text="${ans.answer}"></td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(answerMap[q.id])}">
+            <td colspan="2"><i>No answers yet.</i></td>
+        </tr>
+    </table>
+</div>
+
+<p><a th:href="@{/surveys}">Back</a></p>
+
+</body>
+</html>
