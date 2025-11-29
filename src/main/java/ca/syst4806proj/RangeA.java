@@ -2,6 +2,7 @@ package ca.syst4806proj;
 
 import jakarta.persistence.*;
 
+@Entity
 public class RangeA {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
