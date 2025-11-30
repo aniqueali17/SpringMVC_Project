@@ -155,7 +155,7 @@ public class SurveyController {
 
         multipleChoiceARepo.save(answer);
 
-        // (Optional) if you later want a "view answers" page:
+        // if you later want a "view answers" page:
         // List<MultipleChoiceA> answers = multipleChoiceARepo.findByQuestion(question);
         // model.addAttribute("answers", answers);
         // model.addAttribute("question", question);
@@ -163,6 +163,31 @@ public class SurveyController {
 
         // For now just go back to the survey or survey detail
         return "redirect:/surveys/" + surveyId;
+    }
+
+    @PostMapping("/surveys/{id}/mcq/create")
+    public String addMCQ(@PathVariable Long id,
+                         @RequestParam String prompt,
+                         @RequestParam(required = false) Integer ordinalIndex,
+                         RedirectAttributes redirectAttributes) {
+
+        Survey s = surveyRepo.findById(id).orElse(null);
+        if (s == null) return "redirect:/surveys";
+
+        if (prompt == null || prompt.isBlank()) {
+            redirectAttributes.addFlashAttribute("message", "Prompt is required.");
+            return "redirect:/surveys/" + id;
+        }
+
+        MultipleChoiceQ q = new MultipleChoiceQ();
+        q.setPrompt(prompt.trim());
+        q.setOrdinalIndex(ordinalIndex);
+        q.setSurvey(s);
+
+        multipleChoiceQRepo.save(q);
+
+        redirectAttributes.addFlashAttribute("message", "Multiple-choice question added.");
+        return "redirect:/surveys/" + id;
     }
 
     //View text answers
