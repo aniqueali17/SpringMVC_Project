@@ -16,14 +16,26 @@ public class SurveyController {
     private final TextQRepository textQRepo;
     private final TextARepository textARepo;
     private final RangeQRepository rangeQRepo;
+    private final MultipleChoiceQRepository multipleChoiceQRepo;
+    private final MultipleChoiceARepository multipleChoiceARepo;
 
-    public SurveyController(SurveyRepository surveyRepo, UserRepository userRepo, TextQRepository textQRepo, TextARepository textARepo, RangeQRepository rangeQRepo) {
+
+    public SurveyController(SurveyRepository surveyRepo,
+                            UserRepository userRepo,
+                            TextQRepository textQRepo,
+                            TextARepository textARepo,
+                            RangeQRepository rangeQRepo,
+                            MultipleChoiceQRepository multipleChoiceQRepo,
+                            MultipleChoiceARepository multipleChoiceARepo) {
         this.surveyRepo = surveyRepo;
         this.userRepo = userRepo;
         this.textQRepo = textQRepo;
         this.textARepo = textARepo;
         this.rangeQRepo = rangeQRepo;
+        this.multipleChoiceQRepo = multipleChoiceQRepo;
+        this.multipleChoiceARepo = multipleChoiceARepo;
     }
+
 
     // LIST page
     @GetMapping("/surveys")
@@ -124,6 +136,33 @@ public class SurveyController {
         textARepo.save(ta);
 
         return "redirect:/surveys/" + surveyID;
+    }
+
+    @PostMapping("/saveMultipleChoiceAnswer")
+    public String saveMultipleChoiceAnswer(@RequestParam("surveyId") Long surveyId,
+                                           @RequestParam("mcqId") Long mcqId,
+                                           @RequestParam("selectedOption") String selectedOption,
+                                           Model model) {
+
+        // Look up the question
+        MultipleChoiceQ question = multipleChoiceQRepo.findById(mcqId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid MultipleChoiceQ ID: " + mcqId));
+
+        // Create and save the answer
+        MultipleChoiceA answer = new MultipleChoiceA();
+        answer.setSelectedOption(selectedOption);
+        answer.setQuestion(question);
+
+        multipleChoiceARepo.save(answer);
+
+        // (Optional) if you later want a "view answers" page:
+        // List<MultipleChoiceA> answers = multipleChoiceARepo.findByQuestion(question);
+        // model.addAttribute("answers", answers);
+        // model.addAttribute("question", question);
+        // return "multipleChoiceAnswer-view";
+
+        // For now just go back to the survey or survey detail
+        return "redirect:/surveys/" + surveyId;
     }
 
     //View text answers
