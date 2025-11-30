@@ -29,8 +29,6 @@ public class SurveyController {
 
     @Autowired
     private TextQRepository textQRepository;
-    private final MultipleChoiceQRepository multipleChoiceQRepo;
-    private final MultipleChoiceARepository multipleChoiceARepo;
 
 
     public SurveyController(SurveyRepository surveyRepo,
