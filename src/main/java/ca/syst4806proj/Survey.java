@@ -55,6 +55,14 @@ public class Survey {
         rangeQuestions.remove(q);
     }
 
+    @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"survey"})
+    @OrderBy("ordinalIndex ASC NULLS LAST, id ASC")
+    private List<MultipleChoiceQ> mcqQuestions = new ArrayList<>();
+
+    public List<MultipleChoiceQ> getMcqQuestions() {
+        return mcqQuestions;
+    }
     // (Optional) convenience for views/JSON
     @Transient
     public Long getOwnerId() { return owner != null ? owner.getId() : null; }
