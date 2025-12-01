@@ -31,7 +31,7 @@ public class Main {
     public CommandLineRunner demo(UserRepository userRepo) {
         return args -> {
             if (userRepo.count() == 0) { // prevents re-seeding on every restart
-                userRepo.save(new User("One"));
+                userRepo.save(new User("admin", "adminpassword", User.UserType.ADMIN));
                 userRepo.save(new User("Two"));
                 userRepo.save(new User("Three"));
                 userRepo.save(new User("Four"));
