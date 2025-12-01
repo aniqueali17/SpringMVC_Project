@@ -19,6 +19,7 @@ public class SurveyController {
     private final TextQRepository textQRepo;
     private final TextARepository textARepo;
     private final RangeQRepository rangeQRepo;
+    private final RangeARepository rangeARepo;
     private final MultipleChoiceQRepository multipleChoiceQRepo;
     private final MultipleChoiceARepository multipleChoiceARepo;
     @Autowired
@@ -36,6 +37,7 @@ public class SurveyController {
                             TextQRepository textQRepo,
                             TextARepository textARepo,
                             RangeQRepository rangeQRepo,
+                            RangeARepository rangeARepo,
                             MultipleChoiceQRepository multipleChoiceQRepo,
                             MultipleChoiceARepository multipleChoiceARepo) {
         this.surveyRepo = surveyRepo;
@@ -43,6 +45,7 @@ public class SurveyController {
         this.textQRepo = textQRepo;
         this.textARepo = textARepo;
         this.rangeQRepo = rangeQRepo;
+        this.rangeARepo = rangeARepo;
         this.multipleChoiceQRepo = multipleChoiceQRepo;
         this.multipleChoiceARepo = multipleChoiceARepo;
     }
@@ -96,26 +99,64 @@ public class SurveyController {
 
     @PostMapping("/survey/submit")
     public String submitSurvey(
-            @RequestParam("surveyId") Long surveyId,
-            @RequestParam("questions") List<String> questions,
-            @RequestParam("answers") List<String> answers) {
+            @RequestParam Long surveyId,
+
+            @RequestParam(required = false) List<Long> textQuestionIds,
+            @RequestParam(required = false) List<String> textAnswers,
+
+            @RequestParam(required = false) List<Long> rangeQuestionIds,
+            @RequestParam(required = false) List<Integer> rangeAnswers,
+
+            @RequestParam(required = false) List<Long> mcqIds,
+            @RequestParam(required = false) List<String> mcqAnswers
+    ) {
 
         Survey survey = surveyRepository.findById(surveyId).orElse(null);
-        if (survey == null) {
-            return "redirect:/surveys";
+        if (survey == null) return "redirect:/surveys";
+
+        if (textQuestionIds != null) {
+            for (int i = 0; i < textQuestionIds.size(); i++) {
+                Long qid = textQuestionIds.get(i);
+                String ans = textAnswers.get(i);
+
+                TextQ q = textQRepository.findById(qid).orElse(null);
+                if (q != null) {
+                    TextA t = new TextA();
+                    t.setQuestion(q);
+                    t.setAnswer(ans);
+                    textARepository.save(t);
+                }
+            }
         }
 
-        List<TextQ> textQs = survey.getTextQuestions();
+        if (rangeQuestionIds != null) {
+            for (int i = 0; i < rangeQuestionIds.size(); i++) {
+                Long qid = rangeQuestionIds.get(i);
+                Integer ans = rangeAnswers.get(i);
 
-        for (int i = 0; i < textQs.size(); i++) {
-            TextQ q = textQs.get(i);
-            String ans = answers.get(i);
+                RangeQ q = rangeQRepo.findById(qid).orElse(null);
+                if (q != null) {
+                    RangeA ra = new RangeA();
+                    ra.setQuestion(q);
+                    ra.setAnswer(ans);
+                    rangeARepo.save(ra);
+                }
+            }
+        }
 
-            TextA newAnswer = new TextA();
-            newAnswer.setAnswer(ans);
-            newAnswer.setQuestion(q);   // correct
+        if (mcqIds != null) {
+            for (int i = 0; i < mcqIds.size(); i++) {
+                Long qid = mcqIds.get(i);
+                String ans = mcqAnswers.get(i);
 
-            textARepository.save(newAnswer);
+                MultipleChoiceQ q = multipleChoiceQRepo.findById(qid).orElse(null);
+                if (q != null) {
+                    MultipleChoiceA a = new MultipleChoiceA();
+                    a.setQuestion(q);
+                    a.setSelectedOption(ans);
+                    multipleChoiceARepo.save(a);
+                }
+            }
         }
 
         return "redirect:/surveys/" + surveyId + "/results";
