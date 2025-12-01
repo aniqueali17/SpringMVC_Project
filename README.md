@@ -69,7 +69,11 @@ The final milestone will focus on user authentication, analytics, and deployment
 - **Maven 3.6+**
 - **IntelliJ IDEA** (or any preferred IDE)
 
-### 2. Clone the Repository
+### 2. Sign in and Authentication Instructions
+- For testing purposes, make use of username: admin and password: adminpassword.
+- This will give privilege for creating and updating surveys and userinfo.
+  
+### 3. Clone the Repository
 ```bash
 1. git clone https://github.com/aniqueali17/SpringMVC_Project.git
 2. cd SpringMVC_Project
