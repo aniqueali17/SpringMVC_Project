@@ -56,6 +56,10 @@ The final milestone will focus on user authentication, analytics, and deployment
 
 ***
 
+***
+### ER Diagram - Model
+<img width="1073" height="763" alt="image" src="https://github.com/user-attachments/assets/ad5b47bf-3058-4c01-bbf5-7517be4382bf" />
+
 ## Setup Instructions
 
 ### 1. Prerequisites
