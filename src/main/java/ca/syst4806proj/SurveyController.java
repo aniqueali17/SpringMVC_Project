@@ -64,13 +64,13 @@ public class SurveyController {
                             Model model,
                             @RequestParam("username") String username,
                             @RequestParam("password") String password) {
-        System.out.println("Login attempt: " + username + " / " + password);
+//        System.out.println("Login attempt: " + username + " / " + password);
 
         List<User> users = (List<User>) userRepo.findAll();
 
-        for (User user : users) {
-            System.out.println("DB user: " + user.getName() + " / " + user.getPassword());
-        }
+//        for (User user : users) {
+//            System.out.println("DB user: " + user.getName() + " / " + user.getPassword());
+//        }
         for(User user : users) {
             if(user.getName().equals(username) && user.getPassword().equals(password)) {
                 HttpSession session = request.getSession();
