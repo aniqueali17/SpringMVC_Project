@@ -55,6 +55,8 @@ The final milestone will focus on user authentication, analytics, and deployment
 - **Cloud Deployment** – host the system on Azure with persistent storage.  
 
 ***
+### UML Diagram - Model
+<img width="1136" height="790" alt="image" src="https://github.com/user-attachments/assets/7c14052f-09cc-48ed-8b6a-4af9b5a57fac" />
 
 ***
 ### ER Diagram - Model
