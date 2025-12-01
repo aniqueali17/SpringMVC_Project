@@ -1,5 +1,7 @@
 package ca.syst4806proj;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +39,41 @@ public class SurveyController {
     }
 
 
+    @GetMapping("/logout")
+    public String userLogout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if(session != null) {
+            session.invalidate();
+        }
+        return "redirect:/surveys";
+    }
+
+    @PostMapping("/login")
+    public String userLogin(HttpServletRequest request,
+                            Model model,
+                            @RequestParam("username") String username,
+                            @RequestParam("password") String password) {
+        System.out.println("Login attempt: " + username + " / " + password);
+
+        List<User> users = (List<User>) userRepo.findAll();
+
+        for (User user : users) {
+            System.out.println("DB user: " + user.getName() + " / " + user.getPassword());
+        }
+        for(User user : users) {
+            if(user.getName().equals(username) && user.getPassword().equals(password)) {
+                HttpSession session = request.getSession();
+                if(user.getType().equals(User.UserType.ADMIN)) {
+                    session.setAttribute("userType", "ADMIN");
+                } else if(user.getType().equals(User.UserType.STANDARD)) {
+                    session.setAttribute("userType", "STANDARD");
+                }
+                return "redirect:/surveys";
+            }
+        }
+        model.addAttribute("error", "Invalid username or password");
+        return "login";
+    }
     // LIST page
     @GetMapping("/surveys")
     public String listSurveys(Model model) {
@@ -47,7 +84,15 @@ public class SurveyController {
 
     // CREATE survey (title + ownerId)
     @PostMapping("/surveys/create")
-    public String createSurvey(@RequestParam String title, @RequestParam Long ownerId, Model model) {
+    public String createSurvey(HttpServletRequest request, @RequestParam String title, @RequestParam Long ownerId, Model model) {
+        HttpSession session = request.getSession(false);
+        if(session == null) {
+            model.addAttribute("error", "Must login to access this functionality");
+            return "login";
+        } else if(session.getAttribute("userType") != "ADMIN") {
+            model.addAttribute("error", "Must be admin to access this functionality");
+            return "redirect:/surveys";
+        }
         Optional<User> owner = userRepo.findById(ownerId);
         if (owner.isEmpty()) {
             model.addAttribute("message", "Owner not found");
@@ -73,10 +118,18 @@ public class SurveyController {
 
     // ADD Text Question
     @PostMapping("/surveys/{id}/textq/create")
-    public String addTextQ(@PathVariable Long id,
+    public String addTextQ(HttpServletRequest request, @PathVariable Long id,
                            @RequestParam String prompt,
                            @RequestParam(required = false) Integer ordinalIndex,
                            Model model) {
+        HttpSession session = request.getSession(false);
+        if(session == null) {
+            model.addAttribute("error", "Must login to access this functionality");
+            return "login";
+        } else if(session.getAttribute("userType") != "ADMIN") {
+            model.addAttribute("error", "Must be admin to access this functionality");
+            return "redirect:/surveys";
+        }
         Survey s = surveyRepo.findById(id).orElse(null);
         if (s == null) return "redirect:/surveys";
         if (prompt == null || prompt.isBlank()) {
@@ -95,10 +148,17 @@ public class SurveyController {
 
     // Delete text question
     @PostMapping("/textq/{id}/delete")
-    public String deleteTextQ(@PathVariable Long id,
+    public String deleteTextQ(HttpServletRequest request,@PathVariable Long id,
                               @RequestParam("surveyId") Long surveyId,
-                              RedirectAttributes redirectAttributes) {
-
+                              RedirectAttributes redirectAttributes, Model model) {
+        HttpSession session = request.getSession(false);
+        if(session == null) {
+            model.addAttribute("error", "Must login to access this functionality");
+            return "login";
+        } else if(session.getAttribute("userType") != "ADMIN") {
+            model.addAttribute("error", "Must be admin to access this functionality");
+            return "redirect:/surveys";
+        }
         textQRepo.deleteById(id);
         redirectAttributes.addFlashAttribute("message", "Text question deleted.");
         return "redirect:/surveys/" + surveyId;
@@ -139,7 +199,8 @@ public class SurveyController {
     }
 
     @PostMapping("/saveMultipleChoiceAnswer")
-    public String saveMultipleChoiceAnswer(@RequestParam("surveyId") Long surveyId,
+    public String saveMultipleChoiceAnswer(HttpServletRequest request,
+                                           @RequestParam("surveyId") Long surveyId,
                                            @RequestParam("mcqId") Long mcqId,
                                            @RequestParam("selectedOption") String selectedOption,
                                            Model model) {
@@ -166,11 +227,21 @@ public class SurveyController {
     }
 
     @PostMapping("/surveys/{id}/mcq/create")
-    public String addMCQ(@PathVariable Long id,
+    public String addMCQ(HttpServletRequest request,
+                         @PathVariable Long id,
                          @RequestParam String prompt,
                          @RequestParam(required = false) Integer ordinalIndex,
-                         RedirectAttributes redirectAttributes) {
-
+                         RedirectAttributes redirectAttributes,
+                         Model model) {
+        //Access Control Authentication
+        HttpSession session = request.getSession(false);
+        if(session == null) {
+            model.addAttribute("error", "Must login to access this functionality");
+            return "login";
+        } else if(session.getAttribute("userType") != "ADMIN") {
+            model.addAttribute("error", "Must be admin to access this functionality");
+            return "redirect:/surveys";
+        }
         Survey s = surveyRepo.findById(id).orElse(null);
         if (s == null) return "redirect:/surveys";
 
@@ -204,7 +275,19 @@ public class SurveyController {
 
 
     @PostMapping("/surveys/{id}/remove")
-    public String removeSurvey(@PathVariable Long id) {
+    public String removeSurvey(HttpServletRequest request,
+                               @PathVariable Long id,
+                               Model model) {
+        //Access Control Authentication
+        HttpSession session = request.getSession(false);
+        if(session == null) {
+            model.addAttribute("error", "Must login to access this functionality");
+            return "login";
+        } else if(session.getAttribute("userType") != "ADMIN") {
+            model.addAttribute("error", "Must be admin to access this functionality");
+            return "redirect:/surveys";
+        }
+
         surveyRepo.deleteById(id);
         return "redirect:/surveys";
     }
@@ -253,12 +336,24 @@ public class SurveyController {
 
     // Create rangeq
     @PostMapping("/surveys/{id}/rangeq/create")
-    public String addRangeQ(@PathVariable Long id,
+    public String addRangeQ(HttpServletRequest request,
+                            Model model,
+                            @PathVariable Long id,
                             @RequestParam String prompt,
                             @RequestParam Integer minValue,
                             @RequestParam Integer maxValue,
                             @RequestParam(required = false) Integer ordinalIndex,
                             RedirectAttributes redirectAttributes) {
+
+        //Access Control Authentication
+        HttpSession session = request.getSession(false);
+        if(session == null) {
+            model.addAttribute("error", "Must login to access this functionality");
+            return "login";
+        } else if(session.getAttribute("userType") != "ADMIN") {
+            model.addAttribute("error", "Must be admin to access this functionality");
+            return "redirect:/surveys";
+        }
 
         Optional<Survey> opt = surveyRepo.findById(id);
         if (opt.isEmpty()) {
@@ -293,9 +388,21 @@ public class SurveyController {
 
     // Delete RangeQ question
     @PostMapping("/rangeq/{id}/delete")
-    public String deleteRangeQ(@PathVariable Long id,
+    public String deleteRangeQ(HttpServletRequest request,
+                               Model model,
+                               @PathVariable Long id,
                                @RequestParam("surveyId") Long surveyId,
                                RedirectAttributes redirectAttributes) {
+
+        //Access Control Authentication
+        HttpSession session = request.getSession(false);
+        if(session == null) {
+            model.addAttribute("error", "Must login to access this functionality");
+            return "login";
+        } else if(session.getAttribute("userType") != "ADMIN") {
+            model.addAttribute("error", "Must be admin to access this functionality");
+            return "redirect:/surveys";
+        }
 
         rangeQRepo.deleteById(id);
         redirectAttributes.addFlashAttribute("message", "Range question deleted.");
